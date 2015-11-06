@@ -6,7 +6,8 @@ if (__meteor_bootstrap__ && __meteor_bootstrap__.serverDir) {
   pemFile = path.join(__meteor_bootstrap__.serverDir, 'assets/app/google-key.pem');
 }
 var googleAppsJson = {};
-googleAppsJson = JSON.parse(Assets.getText("googleapps.json"));
+
+googleAppsJson = JSON.parse(fs.readFileSync('assets/app/googleapps.json', 'utf8'));
 
 Meteor.methods({
   // Fetches from a google spreadsheet
