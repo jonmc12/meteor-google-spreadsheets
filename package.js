@@ -1,7 +1,7 @@
 Package.describe({
   summary: "Google Spreadsheets",
   name: "jonmc12:google-spreadsheets",
-  version: "0.4.2_4",
+  version: "0.4.2_5",
   git: "https://github.com/jonmc12/meteor-google-spreadsheets"
 });
 
