@@ -5,6 +5,8 @@ var pemFile;
 if (__meteor_bootstrap__ && __meteor_bootstrap__.serverDir) {
   pemFile = path.join(__meteor_bootstrap__.serverDir, 'assets/app/google-key.pem');
 }
+var googleAppsJson = {};
+googleAppsJson = JSON.parse(Assets.getText("googleapps.json"));
 
 Meteor.methods({
   // Fetches from a google spreadsheet
@@ -43,19 +45,20 @@ Meteor.methods({
     }));
     return fut.wait();
   },
-  'spreadsheet/fetch2': function (spreadsheetName, worksheetId, options) {
-    check(spreadsheetName, String);
+  'spreadsheet/fetch2': function (spreadsheetId, worksheetId, options) {
+    check(spreadsheetId, String);
     check(worksheetId, Match.OneOf(String, Number));
     check(options, Object);
     var fut = new Future(); //don't return until we're done exporting
 
     EditGoogleSpreadsheet.load({
       //debug: true,
-      spreadsheetName: spreadsheetName,
+      spreadsheetId: spreadsheetId,
       worksheetId: worksheetId,
       oauth : {
         email: options.email,
-        keyFile: pemFile
+        keyFile: pemFile,
+        delegationEmail: googleAppsJson.delegationEmail
       }
     }, function sheetReady(err, spreadsheet) {
       if (err) {
@@ -101,6 +104,42 @@ Meteor.methods({
           console.log(err);
           fut.return(false);
         } else {
+          fut.return(true);
+        }
+      });
+    });
+    return fut.wait();
+  },
+  'spreadsheet/update2': function (spreadsheetId, worksheetId, updateObject, options) {
+    check(spreadsheetId, String);
+    check(worksheetId, String);
+    check(updateObject, Object);
+    check(options, Object);
+    var fut = new Future(); //don't return until we're done exporting
+    
+    EditGoogleSpreadsheet.load({
+      //debug: true,
+      spreadsheetId: spreadsheetId,
+      worksheetId: worksheetId,
+      // @TODO:jonmc12 - package can likely be updated to accept existing jwt
+      oauth : {
+        email: options.email,
+        keyFile: pemFile,
+        delegationEmail: googleAppsJson.delegationEmail
+      }
+    }, function sheetReady(err, spreadsheet) {
+      if (err) {
+        console.log("update2 error:", err);
+        fut.return(false);
+        return;
+      }
+      spreadsheet.add(updateObject);
+      spreadsheet.send(function(err) {
+        if (err) {
+          console.log(err);
+          fut.return(false);
+        } else {
+          console.log("updateObject: ", updateObject);
           fut.return(true);
         }
       });
