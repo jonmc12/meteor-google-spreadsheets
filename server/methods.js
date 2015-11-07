@@ -1,13 +1,5 @@
 var path = Npm.require('path');
 var Future = Npm.require(path.join('fibers', 'future'));
-var fs = Npm.require('fs');
-var pemFile;
-if (__meteor_bootstrap__ && __meteor_bootstrap__.serverDir) {
-  pemFile = path.join(__meteor_bootstrap__.serverDir, 'assets/app/google-key.pem');
-}
-var googleAppsJson = {};
-
-googleAppsJson = JSON.parse(fs.readFileSync('assets/app/googleapps.json', 'utf8'));
 
 Meteor.methods({
   // Fetches from a google spreadsheet
@@ -58,8 +50,8 @@ Meteor.methods({
       worksheetId: worksheetId,
       oauth : {
         email: options.email,
-        keyFile: pemFile,
-        delegationEmail: googleAppsJson.delegationEmail
+        key: options.pemFile,
+        delegationEmail: options.delegationEmail
       }
     }, function sheetReady(err, spreadsheet) {
       if (err) {
@@ -125,8 +117,8 @@ Meteor.methods({
       // @TODO:jonmc12 - package can likely be updated to accept existing jwt
       oauth : {
         email: options.email,
-        keyFile: pemFile,
-        delegationEmail: googleAppsJson.delegationEmail
+        key: options.pemFile,
+        delegationEmail: options.delegationEmail
       }
     }, function sheetReady(err, spreadsheet) {
       if (err) {
@@ -140,7 +132,6 @@ Meteor.methods({
           console.log(err);
           fut.return(false);
         } else {
-          console.log("updateObject: ", updateObject);
           fut.return(true);
         }
       });
